@@ -35,3 +35,8 @@ class SceneDefinitionInput(BaseModel):
 class ManualCorrectionInput(BaseModel):
     edit_type: str
     payload: dict
+
+
+class AnalysisRunRequest(BaseModel):
+    frame_skip: int = 3
+    confidence_threshold: float = 0.4

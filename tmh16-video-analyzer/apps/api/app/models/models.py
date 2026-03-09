@@ -1,4 +1,5 @@
 from datetime import datetime
+from sqlalchemy import String, ForeignKey, DateTime, JSON, Float, Text, Integer
 from sqlalchemy import String, ForeignKey, DateTime, JSON, Float, Integer, Text
 from sqlalchemy.orm import Mapped, mapped_column
 from app.db.session import Base
@@ -53,6 +54,63 @@ class AnalysisRun(Base):
     status: Mapped[str] = mapped_column(String(30), default='queued')
     stage: Mapped[str] = mapped_column(String(50), default='queued')
     metadata_json: Mapped[dict] = mapped_column(JSON, default=dict)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class Track(Base):
+    __tablename__ = 'tracks'
+    id: Mapped[int] = mapped_column(primary_key=True)
+    project_id: Mapped[int] = mapped_column(ForeignKey('projects.id'), index=True)
+    run_id: Mapped[int] = mapped_column(ForeignKey('analysis_runs.id'), index=True)
+    object_class: Mapped[str] = mapped_column(String(50), default='car')
+    confidence_avg: Mapped[float] = mapped_column(Float, default=0.5)
+    start_frame: Mapped[int] = mapped_column(Integer, default=0)
+    end_frame: Mapped[int] = mapped_column(Integer, default=0)
+    path: Mapped[list] = mapped_column(JSON, default=list)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class TurningEvent(Base):
+    __tablename__ = 'turning_events'
+    id: Mapped[int] = mapped_column(primary_key=True)
+    project_id: Mapped[int] = mapped_column(ForeignKey('projects.id'), index=True)
+    run_id: Mapped[int] = mapped_column(ForeignKey('analysis_runs.id'), index=True)
+    track_id: Mapped[int | None] = mapped_column(ForeignKey('tracks.id'), nullable=True)
+    movement: Mapped[str] = mapped_column(String(100))
+    event_time_s: Mapped[float] = mapped_column(Float)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class QueueEvent(Base):
+    __tablename__ = 'queue_events'
+    id: Mapped[int] = mapped_column(primary_key=True)
+    project_id: Mapped[int] = mapped_column(ForeignKey('projects.id'), index=True)
+    run_id: Mapped[int] = mapped_column(ForeignKey('analysis_runs.id'), index=True)
+    zone_name: Mapped[str] = mapped_column(String(100), default='default_queue')
+    occupied_count: Mapped[int] = mapped_column(Integer, default=0)
+    event_time_s: Mapped[float] = mapped_column(Float, default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class PedestrianEvent(Base):
+    __tablename__ = 'pedestrian_events'
+    id: Mapped[int] = mapped_column(primary_key=True)
+    project_id: Mapped[int] = mapped_column(ForeignKey('projects.id'), index=True)
+    run_id: Mapped[int] = mapped_column(ForeignKey('analysis_runs.id'), index=True)
+    crossing_name: Mapped[str] = mapped_column(String(100), default='unspecified_crossing')
+    track_id: Mapped[int | None] = mapped_column(ForeignKey('tracks.id'), nullable=True)
+    event_time_s: Mapped[float] = mapped_column(Float, default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class ParkingEvent(Base):
+    __tablename__ = 'parking_events'
+    id: Mapped[int] = mapped_column(primary_key=True)
+    project_id: Mapped[int] = mapped_column(ForeignKey('projects.id'), index=True)
+    run_id: Mapped[int] = mapped_column(ForeignKey('analysis_runs.id'), index=True)
+    zone_name: Mapped[str] = mapped_column(String(100), default='unspecified_zone')
+    event_type: Mapped[str] = mapped_column(String(50), default='stop')
+    dwell_s: Mapped[float] = mapped_column(Float, default=0)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
 
