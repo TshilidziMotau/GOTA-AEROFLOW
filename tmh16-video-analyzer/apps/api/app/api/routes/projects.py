@@ -21,6 +21,13 @@ from app.models.models import (
     Video,
 )
 from app.schemas.schemas import ManualCorrectionInput, ProjectCreate, ProjectOut, SceneDefinitionInput
+from pathlib import Path
+from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
+from sqlalchemy.orm import Session
+from app.db.session import get_db
+from app.models.models import Project, Video, SceneDefinition, ManualEdit, EvidenceExport
+from app.schemas.schemas import ProjectCreate, ProjectOut, SceneDefinitionInput, ManualCorrectionInput
+from app.core.config import settings
 
 router = APIRouter()
 
@@ -76,6 +83,10 @@ def upload_video(project_id: int, file: UploadFile = File(...), db: Session = De
     db.add(video)
     db.commit()
     return {'status': 'uploaded', 'video_path': str(target), 'fps': fps, 'duration_s': duration, 'resolution': video.resolution}
+    video = Video(project_id=project_id, filename=file.filename, path=str(target))
+    db.add(video)
+    db.commit()
+    return {'status': 'uploaded', 'video_path': str(target)}
 
 
 @router.post('/{project_id}/scene')
@@ -185,6 +196,28 @@ def parking(project_id: int, db: Session = Depends(get_db)):
         'occupancy': [{'zone_name': r.zone_name, 'event_type': r.event_type, 'dwell_s': r.dwell_s} for r in rows],
         'no_stopping_infringements': [],
     }
+def counts(project_id: int):
+    return {'project_id': project_id, 'intervals': [], 'review_note': 'TODO: aggregation output integration'}
+
+
+@router.get('/{project_id}/queues')
+def queues(project_id: int):
+    return {'project_id': project_id, 'queue_summary': 'estimated from occupancy', 'items': []}
+
+
+@router.get('/{project_id}/pedestrians')
+def pedestrians(project_id: int):
+    return {'project_id': project_id, 'crossings': [], 'conflicts': []}
+
+
+@router.get('/{project_id}/school-mode')
+def school_mode(project_id: int):
+    return {'project_id': project_id, 'drop_off_events': [], 'flags': []}
+
+
+@router.get('/{project_id}/parking')
+def parking(project_id: int):
+    return {'project_id': project_id, 'occupancy': [], 'no_stopping_infringements': []}
 
 
 @router.post('/{project_id}/report/generate')
@@ -194,6 +227,10 @@ def generate_report(project_id: int, db: Session = Depends(get_db)):
     db.add(export)
     db.commit()
     return {'status': 'queued', 'latest_run_id': latest_run.id if latest_run else None}
+    export = EvidenceExport(project_id=project_id, export_type='pdf', path=f'/storage/reports/{project_id}.pdf')
+    db.add(export)
+    db.commit()
+    return {'status': 'queued'}
 
 
 @router.get('/{project_id}/exports')

@@ -61,13 +61,6 @@ The app provides a **structured checklist and evidence completeness layer**, not
   celery -A app.workers.celery_app worker -l info
   ```
 
-
-## Phase 2 currently implemented
-- Basic OpenCV background-subtraction detection and centroid tracking in worker pipeline
-- Persisted `tracks`, `turning_events`, `queue_events`, `pedestrian_events`, `parking_events` tables
-- 15-minute interval movement aggregation from turning events
-- Detection review API (`GET /projects/{id}/tracks`) and manual reclassify support
-
 ## Zeabur deployment
 See `docs/deployment-zeabur.md`.
 
