@@ -19,6 +19,8 @@ def run_analysis(project_id: int, payload: AnalysisRunRequest, db: Session = Dep
             'confidence_threshold': payload.confidence_threshold,
         },
     )
+def run_analysis(project_id: int, db: Session = Depends(get_db)):
+    run = AnalysisRun(project_id=project_id, status='queued', stage='queued')
     db.add(run)
     db.commit()
     db.refresh(run)
@@ -30,3 +32,4 @@ def run_analysis(project_id: int, payload: AnalysisRunRequest, db: Session = Dep
 def analysis_status(project_id: int, db: Session = Depends(get_db)):
     runs = db.query(AnalysisRun).filter(AnalysisRun.project_id == project_id).all()
     return [{'id': r.id, 'status': r.status, 'stage': r.stage, 'metadata': r.metadata_json} for r in runs]
+    return [{'id': r.id, 'status': r.status, 'stage': r.stage} for r in runs]
