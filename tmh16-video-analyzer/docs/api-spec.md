@@ -53,6 +53,7 @@
 - `GET /projects/{project_id}/release-candidate-lock`
 - `POST /projects/{project_id}/release-candidate-lock`
 - `GET /projects/{project_id}/release-package`
+- `GET /projects/{project_id}/release-package/export`
 
 ## Authentication
 - All `/projects/*` endpoints require `Authorization: Bearer <token>`.

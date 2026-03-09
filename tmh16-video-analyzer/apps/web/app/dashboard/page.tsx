@@ -18,6 +18,7 @@ export default function DashboardPage() {
   const [releaseCandidate, setReleaseCandidate] = useState<any>(null);
   const [candidateLock, setCandidateLock] = useState<any>(null);
   const [releasePackage, setReleasePackage] = useState<any>(null);
+  const [releasePackageExport, setReleasePackageExport] = useState<any>(null);
   const [message, setMessage] = useState('');
 
   const load = () => {
@@ -33,6 +34,7 @@ export default function DashboardPage() {
     api.get(`/projects/${projectId}/release-candidate`).then((r) => setReleaseCandidate(r.data)).catch(() => setReleaseCandidate(null));
     api.get(`/projects/${projectId}/release-candidate-lock`).then((r) => setCandidateLock(r.data)).catch(() => setCandidateLock(null));
     api.get(`/projects/${projectId}/release-package`).then((r) => setReleasePackage(r.data)).catch(() => setReleasePackage(null));
+    api.get(`/projects/${projectId}/release-package/export`).then((r) => setReleasePackageExport(r.data)).catch(() => setReleasePackageExport(null));
     api.get(`/projects/${projectId}/final-review`).then((r) => setFinalReview(r.data)).catch(() => setFinalReview(null));
   };
 
@@ -229,6 +231,24 @@ export default function DashboardPage() {
           <p className="text-xs">Candidate lock drift: {releasePackage.candidate_lock_drift_detected ? 'YES' : 'NO'}</p>
           <p className="text-xs">Manifest drift: {releasePackage.manifest_drift_detected ? 'YES' : 'NO'}</p>
           <p className="text-xs text-slate-600">{releasePackage.disclaimer}</p>
+        </div>
+      )}
+
+
+
+      {releasePackageExport && (
+        <div className="border rounded bg-white p-3 text-sm space-y-1">
+          <p className="font-medium">Release package export</p>
+          <p className="text-xs">Package hash: <span className="break-all">{releasePackageExport.package_sha256}</span></p>
+          <button className="border px-2 py-1 text-xs" onClick={() => {
+            try {
+              navigator.clipboard.writeText(releasePackageExport.content || '');
+              setMessage('Release package JSON copied to clipboard.');
+            } catch {
+              setMessage('Unable to copy release package JSON.');
+            }
+          }}>Copy Package JSON</button>
+          <p className="text-xs text-slate-600">{releasePackageExport.disclaimer}</p>
         </div>
       )}
 

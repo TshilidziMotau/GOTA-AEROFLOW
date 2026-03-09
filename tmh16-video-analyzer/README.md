@@ -167,6 +167,13 @@ The app provides a **structured checklist and evidence completeness layer**, not
 - Release package response includes deterministic `package_sha256` fingerprint for handoff integrity checks
 - Dashboard now surfaces release package fingerprint and lock-drift indicators
 
+
+
+## Phase 20 currently implemented
+- Added release package export endpoint (`GET /projects/{id}/release-package/export`) to return a deterministic JSON payload for handoff tooling
+- Dashboard now surfaces release package export status and a copy-to-clipboard action for JSON package content
+- Export payload retains explicit draft-evidence disclaimer and package fingerprint linkage
+
 ## Zeabur deployment
 See `docs/deployment-zeabur.md`.
 

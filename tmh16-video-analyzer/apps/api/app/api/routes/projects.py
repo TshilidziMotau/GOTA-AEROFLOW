@@ -699,6 +699,20 @@ def release_package(project_id: int, db: Session = Depends(get_db)):
     package['package_sha256'] = hashlib.sha256(digest_src).hexdigest()
     return package
 
+
+
+@router.get('/{project_id}/release-package/export')
+def release_package_export(project_id: int, db: Session = Depends(get_db)):
+    package = release_package(project_id, db)
+    payload = json.dumps(package, sort_keys=True, default=str)
+    return {
+        'project_id': project_id,
+        'package_sha256': package.get('package_sha256'),
+        'format': 'application/json',
+        'content': payload,
+        'disclaimer': 'Exported release package is a draft traceability artifact and does not replace professional engineering sign-off.',
+    }
+
 @router.post('/{project_id}/report/generate')
 def generate_report(project_id: int, db: Session = Depends(get_db), _: CurrentUser = Depends(require_roles('admin', 'analyst'))):
     project = db.get(Project, project_id)
