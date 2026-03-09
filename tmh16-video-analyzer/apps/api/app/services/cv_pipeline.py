@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 
 from app.models.models import (
     AnalysisRun,
+    ParkingEvent,
     PedestrianEvent,
     Project,
     QueueEvent,
@@ -94,6 +95,14 @@ def run_pipeline(db: Session, run_id: int) -> dict:
                 continue
             x, y, w, h = cv2.boundingRect(c)
             cx, cy = x + w // 2, y + h // 2
+            if area < 1300:
+                obj_cls = 'pedestrian'
+            elif area < 3500:
+                obj_cls = 'car'
+            elif area < 7000:
+                obj_cls = 'minibus_taxi'
+            else:
+                obj_cls = 'heavy_truck'
             obj_cls = 'pedestrian' if area < 1300 else 'car'
             detections.append((cx, cy, obj_cls))
 
@@ -139,6 +148,7 @@ def run_pipeline(db: Session, run_id: int) -> dict:
     stored_tracks = 0
     turning_events = 0
     pedestrian_events = 0
+    parking_events = 0
 
     completed_tracks.extend(active.values())
 
@@ -178,6 +188,16 @@ def run_pipeline(db: Session, run_id: int) -> dict:
             db.add(PedestrianEvent(project_id=run.project_id, run_id=run.id, track_id=db_track.id, crossing_name='observed', event_time_s=st.points[-1][2]))
             pedestrian_events += 1
 
+
+        if st.cls in {'car', 'minibus_taxi', 'heavy_truck'} and len(st.points) >= 6:
+            start = st.points[0]
+            end = st.points[-1]
+            displacement = _dist((start[0], start[1]), (end[0], end[1]))
+            dwell = max(0.0, end[2] - start[2])
+            if displacement < 25 and dwell >= 8:
+                db.add(ParkingEvent(project_id=run.project_id, run_id=run.id, zone_name='detected_stop_zone', event_type='stop', dwell_s=dwell))
+                parking_events += 1
+
     run.status = 'completed'
     run.stage = 'completed'
     run.metadata_json = {
@@ -185,6 +205,7 @@ def run_pipeline(db: Session, run_id: int) -> dict:
         'turning_events': turning_events,
         'queue_events': queue_events,
         'pedestrian_events': pedestrian_events,
+        'parking_events': parking_events,
         'note': 'Automated detections are draft evidence and require analyst review.',
     }
     db.commit()

@@ -21,6 +21,13 @@ from app.models.models import (
     Video,
 )
 from app.schemas.schemas import ManualCorrectionInput, ProjectCreate, ProjectOut, SceneDefinitionInput
+from app.services.analytics import (
+    school_mode_flags,
+    summarize_pedestrian_events,
+    summarize_queue_events,
+    summarize_turning_events,
+    tmh16_alignment_card,
+)
 from pathlib import Path
 from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
 from sqlalchemy.orm import Session
@@ -133,6 +140,11 @@ def manual_corrections(project_id: int, payload: ManualCorrectionInput, db: Sess
 @router.get('/{project_id}/counts')
 def counts(project_id: int, db: Session = Depends(get_db)):
     events = db.query(TurningEvent).filter(TurningEvent.project_id == project_id).all()
+    summary = summarize_turning_events([{'event_time_s': e.event_time_s, 'movement': e.movement} for e in events])
+    return {
+        'project_id': project_id,
+        'intervals': summary['intervals'],
+        'peak_interval': summary['peak_interval'],
     intervals: dict[int, dict[str, int]] = defaultdict(lambda: defaultdict(int))
     for e in events:
         bucket = int(e.event_time_s // 900)
@@ -151,6 +163,11 @@ def counts(project_id: int, db: Session = Depends(get_db)):
 @router.get('/{project_id}/queues')
 def queues(project_id: int, db: Session = Depends(get_db)):
     rows = db.query(QueueEvent).filter(QueueEvent.project_id == project_id).all()
+    summary = summarize_queue_events([{'event_time_s': r.event_time_s, 'occupied_count': r.occupied_count} for r in rows])
+    return {
+        'project_id': project_id,
+        'queue_summary': 'estimated from tracked occupancy and slow-moving objects',
+        **summary,
     if not rows:
         return {'project_id': project_id, 'queue_summary': 'estimated from occupancy', 'items': []}
     values = [r.occupied_count for r in rows]
@@ -166,6 +183,12 @@ def queues(project_id: int, db: Session = Depends(get_db)):
 @router.get('/{project_id}/pedestrians')
 def pedestrians(project_id: int, db: Session = Depends(get_db)):
     rows = db.query(PedestrianEvent).filter(PedestrianEvent.project_id == project_id).all()
+    summary = summarize_pedestrian_events([{'crossing_name': r.crossing_name, 'time_s': r.event_time_s} for r in rows])
+    return {
+        'project_id': project_id,
+        'crossings': summary['events'],
+        'crossing_counts': summary['crossing_counts'],
+        'total_crossings': summary['total_crossings'],
     return {
         'project_id': project_id,
         'crossings': [{'crossing_name': r.crossing_name, 'time_s': r.event_time_s} for r in rows],
@@ -177,6 +200,13 @@ def pedestrians(project_id: int, db: Session = Depends(get_db)):
 @router.get('/{project_id}/school-mode')
 def school_mode(project_id: int, db: Session = Depends(get_db)):
     queue_rows = db.query(QueueEvent).filter(QueueEvent.project_id == project_id).all()
+    ped_rows = db.query(PedestrianEvent).filter(PedestrianEvent.project_id == project_id).all()
+    turn_rows = db.query(TurningEvent).filter(TurningEvent.project_id == project_id).all()
+
+    queue_summary = summarize_queue_events([{'event_time_s': r.event_time_s, 'occupied_count': r.occupied_count} for r in queue_rows])
+    ped_summary = summarize_pedestrian_events([{'crossing_name': r.crossing_name, 'time_s': r.event_time_s} for r in ped_rows])
+    flags = school_mode_flags(queue_summary, ped_summary, len(turn_rows))
+
     flags = []
     if any(q.occupied_count >= 6 for q in queue_rows):
         flags.append('queue_buildup_near_gate_estimated')
@@ -184,6 +214,8 @@ def school_mode(project_id: int, db: Session = Depends(get_db)):
         'project_id': project_id,
         'drop_off_events': [],
         'flags': flags,
+        'queue_peak': queue_summary.get('max_queue', 0),
+        'pedestrian_activity': ped_summary.get('total_crossings', 0),
         'review_note': 'School safety observations are draft flags and require analyst confirmation.',
     }
 
@@ -191,6 +223,40 @@ def school_mode(project_id: int, db: Session = Depends(get_db)):
 @router.get('/{project_id}/parking')
 def parking(project_id: int, db: Session = Depends(get_db)):
     rows = db.query(ParkingEvent).filter(ParkingEvent.project_id == project_id).all()
+    occupancy = [{'zone_name': r.zone_name, 'event_type': r.event_type, 'dwell_s': r.dwell_s} for r in rows]
+    short_stay = [o for o in occupancy if o['dwell_s'] <= 180]
+    return {
+        'project_id': project_id,
+        'occupancy': occupancy,
+        'short_stay_count': len(short_stay),
+        'turnover_estimate': len(occupancy),
+        'no_stopping_infringements': [],
+    }
+
+
+@router.get('/{project_id}/tmh16-alignment')
+def tmh16_alignment(project_id: int, db: Session = Depends(get_db)):
+    count_rows = db.query(TurningEvent).filter(TurningEvent.project_id == project_id).all()
+    queue_rows = db.query(QueueEvent).filter(QueueEvent.project_id == project_id).all()
+    ped_rows = db.query(PedestrianEvent).filter(PedestrianEvent.project_id == project_id).all()
+    parking_rows = db.query(ParkingEvent).filter(ParkingEvent.project_id == project_id).all()
+
+    count_summary = summarize_turning_events([{'event_time_s': e.event_time_s, 'movement': e.movement} for e in count_rows])
+    cards = tmh16_alignment_card(
+        has_peak_15=bool(count_summary['peak_interval']),
+        has_movement_breakdown=any((row.get('movements') for row in count_summary['intervals'])),
+        has_queue=bool(queue_rows),
+        has_peds=bool(ped_rows),
+        has_school=bool(queue_rows or ped_rows),
+        has_parking=bool(parking_rows),
+        has_public_transport=False,
+        has_service_heavy=any(t.movement.startswith('cross_') for t in count_rows),
+    )
+    return {
+        'project_id': project_id,
+        'cards': cards,
+        'disclaimer': 'This checklist supports evidence completeness only. Final TMH16 compliance requires professional engineering judgment.',
+    }
     return {
         'project_id': project_id,
         'occupancy': [{'zone_name': r.zone_name, 'event_type': r.event_type, 'dwell_s': r.dwell_s} for r in rows],

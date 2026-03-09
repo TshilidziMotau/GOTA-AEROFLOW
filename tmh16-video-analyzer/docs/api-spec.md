@@ -1,3 +1,4 @@
+# API Spec (MVP+ Phase 3)
 # API Spec (MVP+ Phase 2)
 # API Spec (MVP)
 
@@ -32,10 +33,13 @@
 - `GET /projects/{project_id}/pedestrians`
 - `GET /projects/{project_id}/school-mode`
 - `GET /projects/{project_id}/parking`
+- `GET /projects/{project_id}/tmh16-alignment`
 - `POST /projects/{project_id}/report/generate`
 - `GET /projects/{project_id}/exports`
 
 ## Notes
+- Queue and parking analytics are estimated from tracked occupancy and movement persistence.
+- Automated detections are draft evidence and require professional analyst review and sign-off.
 Automated detections are draft evidence and require professional analyst review and sign-off.
 - `POST /projects/{project_id}/manual-corrections`
 - `POST /projects/{project_id}/report/generate`
