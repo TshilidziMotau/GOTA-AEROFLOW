@@ -1,3 +1,24 @@
+import Link from 'next/link';
+
+const pages = [
+  'video-upload',
+  'scene-setup',
+  'detection-review',
+  'counts-dashboard',
+  'queue-dashboard',
+  'pedestrian-dashboard',
+  'school-mode-dashboard',
+  'parking-dashboard',
+  'report-generation',
+] as const;
+
+type ProjectDetailProps = {
+  params: {
+    id: string;
+  };
+};
+
+export default function ProjectDetail({ params }: ProjectDetailProps) {
 'use client';
 
 import Link from 'next/link';
@@ -16,6 +37,7 @@ export default function ProjectDetail() {
       <ul className="list-disc pl-6 space-y-1">
         {pages.map((page) => (
           <li key={page}>
+            <Link className="text-blue-700 hover:underline" href={`/${page}?projectId=${encodeURIComponent(projectId)}`}>
             <Link className="text-blue-700 hover:underline" href={`/${page}?projectId=${projectId}`}>
               {page}
             </Link>
