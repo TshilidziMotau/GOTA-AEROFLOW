@@ -174,6 +174,13 @@ The app provides a **structured checklist and evidence completeness layer**, not
 - Dashboard now surfaces release package export status and a copy-to-clipboard action for JSON package content
 - Export payload retains explicit draft-evidence disclaimer and package fingerprint linkage
 
+
+
+## Phase 21 currently implemented
+- Updated web runtime scripts to bind `0.0.0.0` and honor `PORT` (`next ... -p ${PORT:-3000}`) for managed platforms
+- Updated `apps/web/Dockerfile` to build for production and run `npm run start` instead of `npm run dev`
+- This avoids startup crash loops caused by dev-mode boot and fixed-port mismatches on Zeabur-style deployments
+
 ## Zeabur deployment
 See `docs/deployment-zeabur.md`.
 
