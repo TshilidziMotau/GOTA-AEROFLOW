@@ -1,0 +1,14 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>TMH16 Evidence Draft</title></head>
+<body>
+  <h1>TMH16 Video Analyzer - Draft Evidence Report</h1>
+  <p><strong>Professional review required.</strong> Automated outputs are assumptions-based and must be checked.</p>
+  <h2>Project details</h2>
+  <p>{{ project.name }} - {{ project.site_name }}</p>
+  <h2>Method statement</h2>
+  <p>Detection/tracking and zone event extraction were used with manual QA support.</p>
+  <h2>TMH16 alignment notes</h2>
+  <ul>{% for c in alignment_cards %}<li>{{ c.topic }}: {{ c.status }}</li>{% endfor %}</ul>
+</body>
+</html>
