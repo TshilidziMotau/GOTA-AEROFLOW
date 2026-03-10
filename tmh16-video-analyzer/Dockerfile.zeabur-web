@@ -1,0 +1,17 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Build from the web app directly (no monorepo root package.json required).
+COPY apps/web/package.json ./package.json
+RUN npm install
+
+COPY apps/web/. .
+
+ENV NODE_ENV=production
+ENV PORT=8080
+
+RUN npm run build
+
+EXPOSE 8080
+CMD ["npm", "run", "start"]

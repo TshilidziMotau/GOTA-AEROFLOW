@@ -35,3 +35,28 @@
 - Use `next start -p ${PORT:-8080}` for runtime on Zeabur.
 - Avoid duplicate `scripts` keys/entries in `package.json`; only one `start` script should exist.
 - If runtime crashes immediately after successful build, verify the effective start command in container logs.
+
+
+## Recommended Zeabur web Dockerfile
+Use `Dockerfile.zeabur-web` at repository root and avoid mutating source files during build.
+
+```dockerfile
+FROM node:20-alpine
+
+WORKDIR /app
+COPY apps/web/package.json ./package.json
+RUN npm install
+COPY apps/web/. .
+
+ENV NODE_ENV=production
+ENV PORT=8080
+
+RUN npm run build
+EXPOSE 8080
+CMD ["npm", "run", "start"]
+```
+
+### Important
+- Do **not** inject `cat > .../app/projects/[id]/page.tsx` (or similar) in Docker build steps.
+- Do **not** mix `pnpm` workspace assumptions unless a root workspace file/package manifest exists.
+- Keep one clear runtime command: `npm run start`.

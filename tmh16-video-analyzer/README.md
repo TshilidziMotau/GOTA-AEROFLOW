@@ -195,6 +195,13 @@ The app provides a **structured checklist and evidence completeness layer**, not
 - Removed `-H` host flag from Next.js scripts and standardized runtime to `next start -p ${PORT:-8080}` for Zeabur
 - Added explicit Next.js host/port troubleshooting notes in Zeabur deployment docs
 
+
+
+## Phase 24 currently implemented
+- Added a canonical root-level `Dockerfile.zeabur-web` for deploying `apps/web` without monorepo root package assumptions
+- Expanded Zeabur deployment docs with an explicit safe Dockerfile and anti-pattern warnings (no build-time source rewriting, no invalid workspace assumptions)
+- Clarified stable runtime expectation for managed deploys: single `npm run start` command on `PORT=8080`
+
 ## Zeabur deployment
 See `docs/deployment-zeabur.md`.
 
