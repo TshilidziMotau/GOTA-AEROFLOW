@@ -60,3 +60,9 @@ CMD ["npm", "run", "start"]
 - Do **not** inject `cat > .../app/projects/[id]/page.tsx` (or similar) in Docker build steps.
 - Do **not** mix `pnpm` workspace assumptions unless a root workspace file/package manifest exists.
 - Keep one clear runtime command: `npm run start`.
+
+
+## If you see "import/export cannot be used outside module code"
+- This usually indicates the file content was mutated during build (for example by an injected `cat > ...page.tsx` step).
+- Remove all custom source-rewrite commands from Zeabur build spec and rely on the repository Dockerfile only.
+- Re-deploy from a clean commit where `apps/web/app/video-upload/page.tsx` has imports only at the top of the file.

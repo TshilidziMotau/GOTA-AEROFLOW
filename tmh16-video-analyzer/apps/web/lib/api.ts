@@ -14,3 +14,12 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
+
+
+export function formatApiError(error: unknown): string {
+  if (axios.isAxiosError(error)) {
+    const detail = (error.response?.data as { detail?: string } | undefined)?.detail;
+    return `(${error.response?.status || 'network'}): ${detail || error.message}`;
+  }
+  return 'unexpected error';
+}

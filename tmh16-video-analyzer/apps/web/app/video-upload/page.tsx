@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { api, formatApiError } from '../../lib/api';
 import axios from 'axios';
 import { api } from '../../lib/api';
 
@@ -100,6 +101,7 @@ export default function VideoUploadPage() {
                 setMessage(`Uploaded to ${selectedProject?.name || `project ${projectId}`}: ${res.data.video_path}`);
                 loadVideos();
               } catch (err) {
+                setMessage(`Upload failed ${formatApiError(err)}`);
                 if (axios.isAxiosError(err)) {
                   const detail = (err.response?.data as any)?.detail;
                   setMessage(`Upload failed (${err.response?.status || 'network'}): ${detail || err.message}`);
