@@ -188,6 +188,13 @@ The app provides a **structured checklist and evidence completeness layer**, not
 - Updated web Dockerfile to expose/bind `8080` with production build + `next start` runtime
 - Added Zeabur web deployment checklist to prevent root-path and runtime-command misconfiguration that causes 502s
 
+
+
+## Phase 23 currently implemented
+- Simplified `apps/web` scripts to a single canonical set (`dev`, `build`, `start`, `lint`) with no duplicate script definitions
+- Removed `-H` host flag from Next.js scripts and standardized runtime to `next start -p ${PORT:-8080}` for Zeabur
+- Added explicit Next.js host/port troubleshooting notes in Zeabur deployment docs
+
 ## Zeabur deployment
 See `docs/deployment-zeabur.md`.
 

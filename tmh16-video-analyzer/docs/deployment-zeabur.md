@@ -29,3 +29,9 @@
 - Ensure startup binds `0.0.0.0` and uses Zeabur `PORT` (defaulted here to `8080`).
 - Do not run `next dev` in production containers; build first and run `next start`.
 - If build succeeds but runtime logs are empty, verify the deployed image command is `npm run start` and not overridden in the dashboard.
+
+
+## Next.js CLI host/port notes
+- Use `next start -p ${PORT:-8080}` for runtime on Zeabur.
+- Avoid duplicate `scripts` keys/entries in `package.json`; only one `start` script should exist.
+- If runtime crashes immediately after successful build, verify the effective start command in container logs.
