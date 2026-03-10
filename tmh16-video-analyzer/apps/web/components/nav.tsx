@@ -5,7 +5,7 @@ const links = [
   ['Projects', '/projects'],
   ['New Project', '/projects/new'],
   ['Settings', '/settings'],
-];
+] as const;
 
 export function Nav() {
   return (
