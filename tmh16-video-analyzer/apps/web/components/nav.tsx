@@ -4,6 +4,7 @@ const links = [
   ['Dashboard', '/dashboard'],
   ['Projects', '/projects'],
   ['New Project', '/projects/new'],
+  ['Video Upload', '/video-upload'],
   ['Settings', '/settings'],
 ] as const;
 
