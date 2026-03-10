@@ -1,0 +1,47 @@
+version: '3.9'
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: tmh16
+      POSTGRES_USER: tmh16
+      POSTGRES_PASSWORD: tmh16
+    ports: ['5432:5432']
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    ports: ['6379:6379']
+
+  api:
+    build: ../apps/api
+    env_file:
+      - ./env.examples
+    ports: ['8000:8000']
+    depends_on: [postgres, redis]
+    volumes:
+      - ../apps/api:/app
+      - ./storage:/storage
+
+  worker:
+    build: ../apps/api
+    command: celery -A app.workers.celery_app worker -l info
+    env_file:
+      - ./env.examples
+    depends_on: [api, redis, postgres]
+    volumes:
+      - ../apps/api:/app
+      - ./storage:/storage
+
+  web:
+    build: ../apps/web
+    env_file:
+      - ./env.examples
+    ports: ['3000:3000']
+    depends_on: [api]
+    volumes:
+      - ../apps/web:/app
+
+volumes:
+  pgdata:
