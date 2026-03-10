@@ -10,5 +10,3 @@ def run_analysis_pipeline(run_id: int):
         return run_pipeline(db, run_id)
     finally:
         db.close()
-    # TODO: integrate OpenCV/YOLO/ByteTrack pipeline stages with persisted event outputs.
-    return {'run_id': run_id, 'status': 'completed', 'notes': 'Skeleton pipeline executed'}

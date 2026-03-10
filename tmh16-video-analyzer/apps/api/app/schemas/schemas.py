@@ -9,6 +9,7 @@ class LoginRequest(BaseModel):
 class LoginResponse(BaseModel):
     access_token: str
     token_type: str = 'bearer'
+    role: str
 
 
 class ProjectCreate(BaseModel):
@@ -40,3 +41,13 @@ class ManualCorrectionInput(BaseModel):
 class AnalysisRunRequest(BaseModel):
     frame_skip: int = 3
     confidence_threshold: float = 0.4
+
+
+class MeResponse(BaseModel):
+    email: str
+    role: str
+
+
+class AnalysisReviewRequest(BaseModel):
+    status: str
+    note: str | None = None

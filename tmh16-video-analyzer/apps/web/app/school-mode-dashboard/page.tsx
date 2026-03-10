@@ -26,6 +26,4 @@ export default function SchoolModeDashboardPage() {
       )}
     </div>
   );
-export default function Page() {
-  return <div><h1 className="text-xl font-semibold">school mode dashboard </h1><p>TODO: implement full module UI with calibration overlays/charts/tables/manual QA.</p></div>;
 }

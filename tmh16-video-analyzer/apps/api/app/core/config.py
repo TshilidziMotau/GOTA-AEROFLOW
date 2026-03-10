@@ -9,6 +9,8 @@ class Settings(BaseSettings):
     jwt_secret: str = 'dev-secret'
     storage_path: str = '/tmp/tmh16-storage'
     report_temp_path: str = '/tmp/tmh16-reports'
+    admin_email: str = 'admin@example.com'
+    admin_password: str = 'admin123'
 
 
 settings = Settings()

@@ -74,6 +74,106 @@ The app provides a **structured checklist and evidence completeness layer**, not
 - Parking stop/dwell event summaries and turnover estimate
 - TMH16 alignment summary endpoint (`GET /projects/{id}/tmh16-alignment`)
 
+## Phase 4 currently implemented
+- Draft evidence pack generation endpoint with HTML report and CSV/XLSX turning exports
+- Export records persisted and available via `GET /projects/{id}/exports`
+- Report generation UI to trigger and review generated export artifacts
+
+## Phase 5 currently implemented
+- Video management API/UI for upload + metadata listing per project
+- Scene setup API/UI with persisted calibration/geometry JSON editor
+- Manual QA enhancements: track reclassify, delete, and merge controls from detection review UI
+- Extended API spec documenting full phase progression endpoints
+
+## Phase 6 currently implemented
+- Seeded admin bootstrap on API startup using `ADMIN_EMAIL` / `ADMIN_PASSWORD`
+- Credential verification with bcrypt hashing + JWT role claims
+- Protected `/projects/*` endpoints with bearer-token auth and role checks for mutating actions
+- Frontend login persists token and API client sends bearer headers automatically
+
+## Phase 7 currently implemented
+- Added authenticated session introspection endpoint (`GET /auth/me`)
+- Protected analysis endpoints with bearer auth and role checks
+- Added settings page session visibility and explicit sign-out control
+
+## Phase 8 currently implemented
+- Added analysis review-state endpoint to mark runs as review-needed/completed/failed with audit logging
+- Added manual edit audit-trail endpoint (`GET /projects/{id}/manual-edits`)
+- Detection review UI now displays manual edit history for defensible QA traceability
+- Counts dashboard supports explicit “approve counts” action captured in audit trail
+
+## Phase 9 currently implemented
+- Added project summary endpoint (`GET /projects/{id}/summary`) for operational dashboard KPIs
+- Added analysis retry endpoint (`POST /projects/{id}/analysis/{run_id}/retry`)
+- Dashboard now supports run/retry/review-needed actions with live operational summary
+
+## Phase 10 currently implemented
+- Added analysis governance audit endpoint (`GET /projects/{id}/analysis/audit`)
+- Dashboard now includes per-run governance controls (mark review-needed/completed/failed)
+- Dashboard now surfaces governance event history for operational traceability
+
+## Phase 11 currently implemented
+- Added project readiness endpoint (`GET /projects/{id}/readiness`) for evidence completeness checks
+- Dashboard now surfaces readiness state and missing evidence items
+- Readiness includes explicit disclaimer that final engineering sign-off is still required
+
+## Phase 12 currently implemented
+- Added final-review governance endpoint (`GET /projects/{id}/final-review`) with blocker checks
+- Added final-review approval action (`POST /projects/{id}/final-review/approve`) gated by readiness
+- Dashboard now exposes final-review state, blockers, and approval control
+
+## Phase 13 currently implemented
+- Added evidence manifest endpoint (`GET /projects/{id}/evidence-manifest`)
+- Manifest includes videos, runs, exports, manual edits and a SHA-256 integrity hash
+- Dashboard now surfaces manifest hash for defensible evidence traceability
+
+
+## Phase 14 currently implemented
+- Added manifest drift endpoint (`GET /projects/{id}/manifest-drift`) to compare current evidence hash against approved snapshot
+- Added manifest snapshot approval action (`POST /projects/{id}/manifest-snapshot/approve`) with audit persistence
+- Dashboard now surfaces snapshot status, drift detection and approval control
+
+
+## Phase 15 currently implemented
+- Added release readiness endpoint (`GET /projects/{id}/release-readiness`) combining final-review, manifest snapshot/drift, and export availability checks
+- Added draft-pack issue action (`POST /projects/{id}/release/issue-draft-pack`) with readiness gating and audit capture
+- Dashboard now surfaces release readiness blockers and an explicit issue-draft-pack control
+
+
+
+## Phase 16 currently implemented
+- Added release governance audit endpoint (`GET /projects/{id}/release-audit`) that aggregates the key release-control events
+- Dashboard now surfaces latest governance timestamps for counts approval, final review approval, manifest snapshot approval, and draft-pack issue
+- Release audit includes explicit workflow disclaimer for professional sign-off boundaries
+
+
+
+## Phase 17 currently implemented
+- Added release candidate endpoint (`GET /projects/{id}/release-candidate`) that composes readiness, manifest state, and governance timestamps into a single snapshot
+- Release candidate response includes deterministic `candidate_sha256` to support handoff traceability of draft-pack state
+- Dashboard now surfaces the release candidate snapshot hash and readiness state
+
+
+
+## Phase 18 currently implemented
+- Added release candidate lock status endpoint (`GET /projects/{id}/release-candidate-lock`) to detect drift between current and locked release candidate snapshots
+- Added release candidate lock action (`POST /projects/{id}/release-candidate-lock`) with idempotent behavior and audit persistence
+- Dashboard now surfaces lock state and explicit lock action for release candidate snapshots
+
+
+
+## Phase 19 currently implemented
+- Added release package endpoint (`GET /projects/{id}/release-package`) to aggregate release readiness, candidate/manifest lock state, and latest export into a single traceability bundle
+- Release package response includes deterministic `package_sha256` fingerprint for handoff integrity checks
+- Dashboard now surfaces release package fingerprint and lock-drift indicators
+
+
+
+## Phase 20 currently implemented
+- Added release package export endpoint (`GET /projects/{id}/release-package/export`) to return a deterministic JSON payload for handoff tooling
+- Dashboard now surfaces release package export status and a copy-to-clipboard action for JSON package content
+- Export payload retains explicit draft-evidence disclaimer and package fingerprint linkage
+
 ## Zeabur deployment
 See `docs/deployment-zeabur.md`.
 

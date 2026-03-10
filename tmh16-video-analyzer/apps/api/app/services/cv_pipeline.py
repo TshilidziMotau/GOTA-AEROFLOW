@@ -103,7 +103,6 @@ def run_pipeline(db: Session, run_id: int) -> dict:
                 obj_cls = 'minibus_taxi'
             else:
                 obj_cls = 'heavy_truck'
-            obj_cls = 'pedestrian' if area < 1300 else 'car'
             detections.append((cx, cy, obj_cls))
 
         used_tracks: set[int] = set()
