@@ -181,6 +181,13 @@ The app provides a **structured checklist and evidence completeness layer**, not
 - Updated `apps/web/Dockerfile` to build for production and run `npm run start` instead of `npm run dev`
 - This avoids startup crash loops caused by dev-mode boot and fixed-port mismatches on Zeabur-style deployments
 
+
+
+## Phase 22 currently implemented
+- Normalized web runtime defaults to `PORT=8080` for both `dev` and `start` scripts to match Zeabur expectations
+- Updated web Dockerfile to expose/bind `8080` with production build + `next start` runtime
+- Added Zeabur web deployment checklist to prevent root-path and runtime-command misconfiguration that causes 502s
+
 ## Zeabur deployment
 See `docs/deployment-zeabur.md`.
 

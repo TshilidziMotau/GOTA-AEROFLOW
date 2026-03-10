@@ -22,3 +22,10 @@
 - Set persistent storage for uploaded media and generated artifacts.
 - Route `NEXT_PUBLIC_API_URL` to your Zeabur API domain.
 - Ensure worker has access to same DB and storage path as API.
+
+
+## Web service checklist (to avoid 502)
+- Set the **service root/workdir** to `tmh16-video-analyzer/apps/web` (or equivalent path in your repo view).
+- Ensure startup binds `0.0.0.0` and uses Zeabur `PORT` (defaulted here to `8080`).
+- Do not run `next dev` in production containers; build first and run `next start`.
+- If build succeeds but runtime logs are empty, verify the deployed image command is `npm run start` and not overridden in the dashboard.
